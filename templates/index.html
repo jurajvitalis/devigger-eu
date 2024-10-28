@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devigger Calculator</title>
+</head>
+<body>
+    <h1>Decimal Devigger</h1>
+    <form method="POST">
+        <h3>Settings:</h3>
+        <label for="kelly_budget">Kelly bank roll (e.g., 10000):</label>
+        <input type="text" id="kelly_budget" name="kelly_budget" value="{{ kelly_budget or '' }}" required>
+        <br>
+        <label for="kelly_mult">Kelly multiplier (e.g., 0.1):</label>
+        <input type="text" id="kelly_mult" name="kelly_mult" value="{{ kelly_mult or '' }}" required>
+        <br>
+        <br>
+        <h3>Odds:</h3>
+        <label for="odds_input">Enter odds (e.g., 1.5/2.5, 1.4/2.5):</label>
+        <input type="text" id="odds_input" name="odds_input" value="{{ odds_input or '' }}" required>
+        <br>
+        <label for="final_odds">Final odds (e.g., 3):</label>
+        <input type="text" id="final_odds" name="final_odds" value="{{ final_odds or '' }}" required>
+        <br>
+        <button type="submit">Calculate</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <h2>Results:</h2>
+    {% if multiplicative_results %}
+        <h3>Multiplicative Method:</h3>
+        <p>{{ multiplicative_results | safe }}</p>
+    {% endif %}
+    {% if additive_results %}
+        <h3>Additive Method:</h3>
+        <p>{{ additive_results | safe }}</p>
+    {% endif %}
+    {% if power_results %}
+        <h3>Power Method:</h3>
+        <p>{{ power_results | safe }}</p>
+    {% endif %}
+</body>
+</html>
