@@ -170,7 +170,7 @@ def calculate_shin_method(legs_odds, legs_probs, margins, final_odds, kelly_budg
     legs_odds_devigged_us = []
     for i in range(len(legs_odds)):
         devigged_probs = shin.calculate_implied_probabilities(legs_odds[i])
-        devigged_odds = pybettor.convert_odds(devigged_probs, cat_in="prob", cat_out="dec")
+        devigged_odds = [1/p for p in devigged_probs]
         devigged_odds_us = pybettor.convert_odds(devigged_probs, cat_in="prob", cat_out="us")
         legs_odds_devigged.append(devigged_odds)
         legs_odds_devigged_us.append(devigged_odds_us)
