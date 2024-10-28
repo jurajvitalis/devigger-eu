@@ -6,7 +6,7 @@
     <title>Decimal Devigger</title>
 </head>
 <body>
-    <h1>Decimal Devigger</h1>
+    <h1>Sportsbook devigger for EU odds</h1>
     <form method="POST">
         <h3>Settings:</h3>
         <label for="kelly_budget">Kelly bank roll (e.g., 10000):</label>
@@ -20,7 +20,7 @@
         <label for="odds_input">Enter odds (e.g., 1.5/2.5, 1.4/2.5):</label>
         <input type="text" id="odds_input" name="odds_input" value="{{ odds_input or '' }}" required>
         <br>
-        <label for="final_odds">Final odds (e.g., 3):</label>
+        <label for="final_odds">Final odds (e.g., 3.0):</label>
         <input type="text" id="final_odds" name="final_odds" value="{{ final_odds or '' }}" required>
         <br>
         <button type="submit">Calculate</button>

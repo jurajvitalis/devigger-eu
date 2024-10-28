@@ -1,3 +1,3 @@
 # devigger-eu
 
-hosted at https://web-production-77db.up.railway.app
+hosted at https://devigger-eu.up.railway.app

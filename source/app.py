@@ -163,7 +163,7 @@ def calculate_multiplicative_method(legs_odds, legs_probs, margins, final_odds, 
 
 
 if __name__ == "__main__":
-    # Run in localhost
+    # # Run in localhost
     # app.run(debug=True)
 
     # Run in hosting
