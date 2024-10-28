@@ -104,24 +104,6 @@ def or_solvefor(cc, probs, margin):
     tmp = or_func(cc, probs)
     return np.sum(tmp) - (1 + margin)
 
-
-# def _implied_power_odds(prob, margin):
-#     if margin != 0:
-#         res = optimize.root_scalar(
-#             f=pwr_solvefor,
-#             bracket=[0.0001, 1.1],
-#             method="brentq",
-#             args=(np.array(prob), margin),
-#         )
-#         exponent = res.root
-#     else:
-#         exponent = 1
-#
-#     imp_odds = [1 / pwr_func(nn=exponent, probs=x) for x in prob]
-#
-#     return imp_odds, exponent
-
-
 def _implied_power_odds(odds, margin):
     """
     Calculates the adjusted probabilities using the power method.
@@ -163,12 +145,6 @@ def pwr_func(nn, probs):
 def pwr_solvefor(nn, probs, margin):
     tmp = pwr_func(nn, probs)
     return np.sum(tmp) - (1 + margin)
-
-
-# def _implied_additive_odds(probs, margin):
-#     imp_odds = [1 / (x + (margin / len(probs))) for x in probs]
-#     return imp_odds
-
 
 def _implied_additive_odds(probs, margin):
     imp_probs = [prob - margin / len(probs) for prob in probs]
