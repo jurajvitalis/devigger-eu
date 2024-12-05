@@ -6,29 +6,32 @@
     <title>Decimal Devigger</title>
 </head>
 <body>
-    <h1>Sportsbook devigger for EU odds</h1>
+    <h1>Sportsbook devigger for EU (decimal) odds</h1>
     <form method="POST">
         <h3>Settings:</h3>
         <label for="kelly_budget">Kelly bank roll (e.g., 10000):</label>
-        <input type="text" id="kelly_budget" name="kelly_budget" value="{{ kelly_budget or '10000' }}" required>
+        <input type="text" id="kelly_budget" name="kelly_budget" value="{{ kelly_budget }}" required>
         <br>
         <label for="kelly_mult">Kelly multiplier (e.g., 0.1):</label>
-        <input type="text" id="kelly_mult" name="kelly_mult" value="{{ kelly_mult or '0.1' }}" required>
+        <input type="text" id="kelly_mult" name="kelly_mult" value="{{ kelly_mult }}" required>
         <br>
         <br>
         <h3>Odds:</h3>
         <label for="odds_input">Enter odds for each leg (e.g., 1.5/2.5, 1.4/2.5):</label>
-        <input type="text" id="odds_input" name="odds_input" style="width: 800px;" value="{{ odds_input or '1.5/2.5, 1.4/2.5' }}" required>
+        <input type="text" id="odds_input" name="odds_input" style="width: 800px;" value="{{ odds_input }}" required>
         <br>
         <label for="final_odds">Enter final odds (e.g., 3.0):</label>
-        <input type="text" id="final_odds" name="final_odds" value="{{ final_odds or '3.0' }}" required>
+        <input type="text" id="final_odds" name="final_odds" value="{{ final_odds }}" required>
         <br>
         <button type="submit">Calculate</button>
     </form>
 
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
+{% if error %}
+    <div style="color: red; font-size: 1.2em; font-weight: bold; margin-top: 10px; padding: 10px; border: 1px solid red;
+    border-radius: 5px; background-color: #ffe6e6; white-space: pre-line; display: inline-block;">
+        {{ error }}
+    </div>
+{% endif %}
 
     <h2>Results:</h2>
     {% if multiplicative_results %}

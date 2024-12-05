@@ -242,8 +242,8 @@ def implied_odds(
     if type(prob) is not list:
         prob = [prob]
 
-    assert all(isinstance(x, float) for x in prob), "probability must be numeric"
-    assert all(x > 0 and x < 1 for x in prob), "probability must be between 0 and 1"
+    assert all(isinstance(x, float) for x in prob), "calculating implied odds: probability must be numeric"
+    assert all(x > 0 and x < 1 for x in prob), "calculating implied odds: probability must be between 0 and 1"
     assert category in [
         "us",
         "frac",
@@ -260,18 +260,18 @@ def implied_odds(
         "shin",
         "balanced_book",
     ], "method must be either: ('naive', 'basic', 'wpo', 'odds_ratio', 'power', 'additive', 'shin', 'balanced_book')"
-    assert isinstance(margin, (int, float)), "margin must be numeric"
-    assert margin >= 0, "margin must be greater than or equal to 0"
+    assert isinstance(margin, (int, float)), "calculating implied odds: margin must be numeric"
+    assert margin >= 0, "calculating implied odds: margin must be greater than or equal to 0"
     assert (
         isinstance(gross_margin, (int, float)) or gross_margin is None
-    ), "gross_margin must be numeric or None"
+    ), "calculating implied odds: gross_margin must be numeric or None"
     assert gross_margin is None or (
         gross_margin >= 0 and gross_margin < 1
-    ), "gross_margin must be None or between 0 and 1"
+    ), "calculating implied odds: gross_margin must be None or between 0 and 1"
     if len(prob) > 1 and method != "naive":
         assert (
             np.sum(prob) >= 1 - margin
-        ), "sum of probabilities must be greater than or equal to 1 - margin"
+        ), "calculating implied odds: sum of probabilities must be greater than or equal to 1 - margin"
 
     if normalize:
         balanced_prob = [x / np.sum(prob) for x in prob]
