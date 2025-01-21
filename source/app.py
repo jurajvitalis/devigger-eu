@@ -1,4 +1,6 @@
 import os
+import statistics
+
 from flask import Flask, request, render_template, make_response
 import numpy as np
 import pybettor
@@ -20,10 +22,12 @@ def index():
     final_odds = ""
     error = None
 
-    multiplicative_results = None
-    additive_results = None
-    power_results = None
-    shin_results = None
+    multiplicative_results_str = None
+    additive_results_str = None
+    power_results_str = None
+    shin_results_str = None
+    min_results_str = None
+    avg_results_str = None
     error = None
 
     if request.method == "POST":
@@ -56,20 +60,40 @@ def index():
             margins = [calculate_margin(odds) for odds in legs_odds]
 
             # Calculations for each method
-            multiplicative_results = calculate_multiplicative_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult)
-            additive_results = calculate_additive_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult)
-            power_results = calculate_power_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult)
-            shin_results = calculate_shin_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult)
+            results = {
+                "mult": calculate_multiplicative_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult),
+                "add": calculate_additive_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult),
+                "power": calculate_power_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult),
+                "shin": calculate_shin_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult)
+            }
+
+            evs = [result[1][1] for result in results.items()]
+            kellys = [result[1][2] for result in results.items()]
+
+            ev_avg = round(statistics.mean(evs), 2)
+            kelly_avg = round(statistics.mean(kellys), 2)
+            avg_results_str = f"AVG: EV% = {ev_avg}%, Kelly Wager = ${kelly_avg}"
+
+            ev_min = min(evs)
+            kelly_min = min(kellys)
+            min_results_str = f"MIN: EV% = {ev_min}%, Kelly Wager = ${kelly_min}"
+
+            multiplicative_results_str = results["mult"][0]
+            additive_results_str = results["add"][0]
+            power_results_str = results["power"][0]
+            shin_results_str = results["shin"][0]
 
         except Exception as e:
             error = f"Invalid input. Please enter valid numbers.\n\nError: '{str(e)}'"
 
         response = make_response(render_template(
             "index.html",
-            multiplicative_results=multiplicative_results,
-            additive_results=additive_results,
-            power_results=power_results,
-            shin_results=shin_results,
+            multiplicative_results=multiplicative_results_str,
+            additive_results=additive_results_str,
+            power_results=power_results_str,
+            shin_results=shin_results_str,
+            min_results=min_results_str,
+            avg_results=avg_results_str,
             kelly_budget=kelly_budget_input,
             kelly_mult=kelly_mult_input,
             odds_input=odds_input,
@@ -124,7 +148,11 @@ def calculate_power_method(legs_odds, legs_probs, margins, final_odds, kelly_bud
     summary += f"<br>Final Odds ({final_odds}): Total Fair Value = {round(total_odds_devigged, 2)} " \
                f"(US {total_odds_devigged_us[0]}) ({round(1 / total_odds_devigged * 100, 2)}%)"
 
-    return f"{summary}<br>EV% = {round(total_ev, 2)}%, Kelly Wager = ${total_kelly_bet}"
+    return (
+        f"{summary}<br>EV% = {total_ev}%, Kelly Wager = ${total_kelly_bet}",
+        total_ev,
+        total_kelly_bet
+    )
 
 
 def calculate_additive_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult):
@@ -161,7 +189,11 @@ def calculate_additive_method(legs_odds, legs_probs, margins, final_odds, kelly_
     summary += f"<br>Final Odds ({final_odds}): Total Fair Value = {round(total_odds_devigged, 2)} " \
                f"(US {total_odds_devigged_us[0]}) ({round(1 / total_odds_devigged * 100, 2)}%)"
 
-    return f"{summary}<br>EV% = {round(total_ev, 2)}%, Kelly Wager = ${total_kelly_bet}"
+    return (
+        f"{summary}<br>EV% = {total_ev}%, Kelly Wager = ${total_kelly_bet}",
+        total_ev,
+        total_kelly_bet
+    )
 
 
 def calculate_multiplicative_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult):
@@ -198,7 +230,11 @@ def calculate_multiplicative_method(legs_odds, legs_probs, margins, final_odds, 
     summary += f"<br>Final Odds ({final_odds}): Total Fair Value = {round(total_odds_devigged, 2)} " \
                f"(US {total_odds_devigged_us[0]}) ({round(1 / total_odds_devigged * 100, 2)}%)"
 
-    return f"{summary}<br>EV% = {round(total_ev, 2)}%, Kelly Wager = ${total_kelly_bet}"
+    return (
+        f"{summary}<br>EV% = {total_ev}%, Kelly Wager = ${total_kelly_bet}",
+        total_ev,
+        total_kelly_bet
+    )
 
 
 def calculate_shin_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult):
@@ -235,7 +271,11 @@ def calculate_shin_method(legs_odds, legs_probs, margins, final_odds, kelly_budg
     summary += f"<br>Final Odds ({final_odds}): Total Fair Value = {round(total_odds_devigged, 2)} " \
                f"(US {total_odds_devigged_us[0]}) ({round(1 / total_odds_devigged * 100, 2)}%)"
 
-    return f"{summary}<br>EV% = {round(total_ev, 2)}%, Kelly Wager = ${total_kelly_bet}"
+    return (
+        f"{summary}<br>EV% = {total_ev}%, Kelly Wager = ${total_kelly_bet}",
+        total_ev,
+        total_kelly_bet
+    )
 
 
 if __name__ == "__main__":

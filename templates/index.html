@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decimal Devigger</title>
+    <style>
+        .summary-results p {
+            margin: 0px 0;
+        }
+    </style>
 </head>
 <body>
     <h1>Sportsbook devigger for EU (decimal) odds</h1>
@@ -26,25 +31,33 @@
         <button type="submit">Calculate</button>
     </form>
 
-{% if error %}
-    <div style="color: red; font-size: 1.2em; font-weight: bold; margin-top: 10px; padding: 10px; border: 1px solid red;
-    border-radius: 5px; background-color: #ffe6e6; white-space: pre-line; display: inline-block;">
-        {{ error }}
-    </div>
-{% endif %}
+    {% if error %}
+        <div style="color: red; font-size: 1.2em; font-weight: bold; margin-top: 10px; padding: 10px; border: 1px solid red;
+        border-radius: 5px; background-color: #ffe6e6; white-space: pre-line; display: inline-block;">
+            {{ error }}
+        </div>
+    {% endif %}
 
-    <h2>Results:</h2>
+    {% if min_results %}
+        <h2>Results:</h2>
+        <h3>Summary:</h3>
+        <div class="summary-results">
+            <p>{{ min_results | safe }}</p>
+            <p>{{ avg_results | safe }}</p>
+        </div>
+    {% endif %}
+
     {% if multiplicative_results %}
         <h3>Multiplicative Method:</h3>
         <p>{{ multiplicative_results | safe }}</p>
     {% endif %}
-    {% if additive_results %}
-        <h3>Additive Method:</h3>
-        <p>{{ additive_results | safe }}</p>
-    {% endif %}
     {% if power_results %}
         <h3>Power Method:</h3>
         <p>{{ power_results | safe }}</p>
+    {% endif %}
+    {% if additive_results %}
+        <h3>Additive Method:</h3>
+        <p>{{ additive_results | safe }}</p>
     {% endif %}
     {% if shin_results %}
         <h3>Shin Method:</h3>
