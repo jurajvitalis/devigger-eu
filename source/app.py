@@ -1,6 +1,6 @@
 import os
 import statistics
-
+import re
 from flask import Flask, request, render_template, make_response
 import numpy as np
 import pybettor
@@ -18,6 +18,7 @@ def index():
     # Retrieve Kelly values from cookies if they exist
     kelly_budget_input = request.cookies.get("kelly_budget", "")
     kelly_mult_input = request.cookies.get("kelly_mult", "")
+    input_mode = request.cookies.get("input_mode", "odds")
     odds_input = ""
     final_odds = ""
     error = None
@@ -34,27 +35,58 @@ def index():
         # Get inputs
         kelly_budget_input = request.form.get("kelly_budget", "")
         kelly_mult_input = request.form.get("kelly_mult", "")
+        input_mode = request.form.get("input_mode_hidden", "odds")
         odds_input = request.form.get("odds_input", "")
         final_odds_input = request.form.get("final_odds", "")
+        evf_input = request.form.get("evf_input", "")
 
         # Validate input and perform calculations
         try:
             # Validate input
-            if not kelly_budget_input or not kelly_mult_input or not odds_input or not final_odds_input:
+            if not kelly_budget_input or not kelly_mult_input:
                 raise ValueError("All fields are required.")
             kelly_budget = float(kelly_budget_input)
             kelly_mult = float(kelly_mult_input)
-            final_odds = float(final_odds_input)
 
-            # Parse odds input
-            legs = odds_input.split(',')
-            legs_odds = []
-            legs_probs = []
-            for leg in legs:
-                odds = list(map(float, leg.split('/')))
-                probs = [1 / o for o in odds]
-                legs_odds.append(odds)
-                legs_probs.append(probs)
+            if input_mode == "odds":
+                if not odds_input or not final_odds_input:
+                    raise ValueError("All fields are required.")
+                # Parse odds input
+                final_odds = float(final_odds_input)
+                legs = odds_input.split(',')
+                legs_odds = []
+                legs_probs = []
+                for leg in legs:
+                    odds = list(map(float, leg.split('/')))
+                    probs = [1 / o for o in odds]
+                    legs_odds.append(odds)
+                    legs_probs.append(probs)
+
+            elif input_mode == "evf":
+                if not evf_input:
+                    raise ValueError("All fields are required.")
+                # Parse input from ev finder
+                pattern = re.compile(
+                    r"\+EV opportunity (\d+):.*?"
+                    r"Devig line odds \(avg\): ([\d.]+)/([\d.]+).*?"
+                    r"Value odds: ([\d.]+)/([\d.]+)",
+                    re.DOTALL
+                )
+                results = []
+                for match in pattern.finditer(evf_input):
+                    opp_num, d1, d2, v1, v2 = match.groups()
+                    results.append({
+                        "opportunity": int(opp_num),
+                        "devig_line_odds": (float(d1), float(d2)),
+                        "value_odds": (float(v1), float(v2)),
+                    })
+                final_odds = 1
+                legs_odds = []
+                legs_probs = []
+                for leg in results:
+                    legs_odds.append(leg["devig_line_odds"])
+                    legs_probs.append([1 / o for o in leg["devig_line_odds"]])
+                    final_odds *= leg["value_odds"][0]
 
             # Calculate raw margin for each leg
             margins = [calculate_margin(odds) for odds in legs_odds]
@@ -98,20 +130,26 @@ def index():
             kelly_mult=kelly_mult_input,
             odds_input=odds_input,
             final_odds=final_odds_input,
+            input_mode=input_mode,
+            evf_input=evf_input,
             error=error
         ))
 
         # Save Kelly values to cookies, with 1 year expiration
         response.set_cookie("kelly_budget", kelly_budget_input, max_age=60 * 60 * 24 * 365)
         response.set_cookie("kelly_mult", kelly_mult_input, max_age=60 * 60 * 24 * 365)
+        response.set_cookie("input_mode", input_mode, max_age=60 * 60 * 24 * 365)
 
         # Render page with calculated values
         return response
 
     # Request is not POST: render page, fill form with values from cookies
-    return render_template("index.html",
-                           kelly_budget=kelly_budget_input,
-                           kelly_mult=kelly_mult_input)
+    return render_template(
+        "index.html",
+        kelly_budget=kelly_budget_input,
+        kelly_mult=kelly_mult_input,
+        input_mode=input_mode
+    )
 
 
 def calculate_power_method(legs_odds, legs_probs, margins, final_odds, kelly_budget, kelly_mult):
@@ -283,5 +321,5 @@ if __name__ == "__main__":
     # app.run(debug=True)
 
     # Run in hosting
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 6767))
     app.run(host="0.0.0.0", port=port)

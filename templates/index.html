@@ -20,14 +20,31 @@
         <label for="kelly_mult">Kelly multiplier (e.g., 0.1):</label>
         <input type="text" id="kelly_mult" name="kelly_mult" value="{{ kelly_mult }}" required>
         <br>
-        <br>
-        <h3>Odds:</h3>
-        <label for="odds_input">Enter odds for each leg (e.g., 1.5/2.5, 1.4/2.5):</label>
-        <input type="text" id="odds_input" name="odds_input" style="width: 800px;" value="{{ odds_input }}" required>
-        <br>
-        <label for="final_odds">Enter final odds (e.g., 3.0):</label>
-        <input type="text" id="final_odds" name="final_odds" value="{{ final_odds }}" required>
-        <br>
+
+        <label for="input_mode">Input mode:</label>
+        <select id="input_mode" name="input_mode" onchange="toggleInputs()">
+            <option value="odds" {% if input_mode == 'odds' %}selected{% endif %}>Odds input</option>
+            <option value="evf" {% if input_mode == 'evf' %}selected{% endif %}>EV finder input</option>
+        </select>
+        <input type="hidden" id="input_mode_hidden" name="input_mode_hidden" value="{{ input_mode | default('odds') }}">
+
+        <br><br>
+        <div id="odds_container">
+            <h3>Odds:</h3>
+            <label for="odds_input">Enter odds for each leg (e.g., 1.5/2.5, 1.4/2.5):</label>
+            <input type="text" id="odds_input" name="odds_input" style="width: 800px;" value="{{ odds_input }}">
+            <br>
+            <label for="final_odds">Enter final odds (e.g., 3.0):</label>
+            <input type="text" id="final_odds" name="final_odds" value="{{ final_odds }}">
+            <br>
+        </div>
+
+        <div id="evf_container" style="display:none;">
+            <h3>EV finder full output:</h3>
+            <label for="evf_input">(Either enter odds above, or this, not both):</label>
+            <input type="text" id="evf_input" name="evf_input" style="width: 800px;" value="{{ evf_input }}">
+            <br>
+        </div>
         <button type="submit">Calculate</button>
     </form>
 
@@ -67,5 +84,38 @@
     <footer>
         <p>For more info, and the source code, see <a href="https://github.com/jurajvitalis/devigger-eu" target="_blank">GitHub</a>.</p>
     </footer>
+<script>
+// Set display style for odds_input / evf_input based on the input mode select field
+function toggleInputs() {
+    const mode = document.getElementById('input_mode').value;
+    const oddsContainer = document.getElementById('odds_container');
+    const evfContainer = document.getElementById('evf_container');
+    const hidden = document.getElementById('input_mode_hidden');
+
+    hidden.value = mode; // store current mode in form
+
+    if (mode === 'odds') {
+        oddsContainer.style.display = 'block';
+        evfContainer.style.display = 'none';
+    } else {
+        oddsContainer.style.display = 'none';
+        evfContainer.style.display = 'block';
+    }
+}
+
+// Read input_mode from the server, set dropdown and hidden field, call toggleInputs()
+document.addEventListener('DOMContentLoaded', function() {
+    const savedMode = "{{ input_mode | default('odds') }}";
+    const select = document.getElementById('input_mode');
+    const hidden = document.getElementById('input_mode_hidden');
+    if (select) {
+        select.value = savedMode;
+    }
+    if (hidden) {
+        hidden.value = savedMode;
+    }
+    toggleInputs();
+});
+</script>
 </body>
 </html>
